@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Rasheedat Oladoja" />
+
+<meta name="date" content="2026-03-30" />
+
+<title>Introduction to zmctp: Zero-Modified Complex Tri-parametric Pearson Distribution</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to zmctp: Zero-Modified
+Complex Tri-parametric Pearson Distribution</h1>
+<h4 class="author">Rasheedat Oladoja</h4>
+<h4 class="date">2026-03-30</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#abstract" id="toc-abstract">Abstract</a></li>
+<li><a href="#introduction" id="toc-introduction">1. Introduction</a>
+<ul>
+<li><a href="#background" id="toc-background">1.1 Background</a></li>
+<li><a href="#the-complex-triparametric-pearson-ctp-distribution" id="toc-the-complex-triparametric-pearson-ctp-distribution">1.2 The
+Complex TriParametric Pearson (CTP) Distribution</a>
+<ul>
+<li><a href="#mathematical-definition" id="toc-mathematical-definition">Mathematical Definition</a></li>
+<li><a href="#moments" id="toc-moments">Moments</a></li>
+</ul></li>
+<li><a href="#why-zmctp" id="toc-why-zmctp">1.3 Why zmctp?</a>
+<ul>
+<li><a href="#problem-with-existing-implementations" id="toc-problem-with-existing-implementations">Problem with Existing
+Implementations</a></li>
+<li><a href="#the-zmctp-solution" id="toc-the-zmctp-solution">The zmctp
+Solution</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#basic-usage" id="toc-basic-usage">2. Basic Usage</a>
+<ul>
+<li><a href="#distribution-functions" id="toc-distribution-functions">2.1 Distribution Functions</a></li>
+<li><a href="#checking-for-overdispersion" id="toc-checking-for-overdispersion">2.2 Checking for
+Overdispersion</a></li>
+<li><a href="#fitting-the-ctp-model" id="toc-fitting-the-ctp-model">2.3
+Fitting the CTP Model</a></li>
+<li><a href="#diagnostic-plots" id="toc-diagnostic-plots">2.4 Diagnostic
+Plots</a></li>
+</ul></li>
+<li><a href="#zero-modified-ctp-distribution" id="toc-zero-modified-ctp-distribution">3. Zero-Modified CTP
+Distribution</a>
+<ul>
+<li><a href="#when-to-use-zm-ctp" id="toc-when-to-use-zm-ctp">3.1 When
+to Use ZM-CTP</a></li>
+<li><a href="#mathematical-definition-1" id="toc-mathematical-definition-1">3.2 Mathematical Definition</a></li>
+<li><a href="#example-zero-inflated-data" id="toc-example-zero-inflated-data">3.3 Example: Zero-Inflated
+Data</a></li>
+</ul></li>
+<li><a href="#comparison-with-cpd-package" id="toc-comparison-with-cpd-package">5. Comparison with cpd Package</a>
+<ul>
+<li><a href="#the-problem-with-large-sample-sizes" id="toc-the-problem-with-large-sample-sizes">5.1 The Problem with Large
+Sample Sizes</a></li>
+<li><a href="#demonstration" id="toc-demonstration">5.2
+Demonstration</a></li>
+</ul></li>
+<li><a href="#model-selection-guide" id="toc-model-selection-guide">6.
+Model Selection Guide</a>
+<ul>
+<li><a href="#decision-tree" id="toc-decision-tree">6.1 Decision
+Tree</a></li>
+</ul></li>
+<li><a href="#properties-and-theoretical-results" id="toc-properties-and-theoretical-results">7. Properties and
+Theoretical Results</a>
+<ul>
+<li><a href="#skewness" id="toc-skewness">7.1 Skewness</a></li>
+<li><a href="#mode" id="toc-mode">7.2 Mode</a></li>
+<li><a href="#key-findings-from-oladoja-2021" id="toc-key-findings-from-oladoja-2021">9.1 Key Findings from Oladoja
+(2021)</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references">References</a></li>
+<li><a href="#session-info" id="toc-session-info">Session Info</a></li>
+</ul>
+</div>
+
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>The <strong>zmctp</strong> package extends the Complex Tri-parametric
+Pearson (CTP) distribution with zero-modified versions for overdispersed
+count data. This package addresses limitations of existing
+implementations when the parameter <span class="math inline">\(b\)</span> approaches zero, providing distribution
+functions, maximum likelihood estimation, and diagnostic tools based on
+Rodríguez-Avi et al. (2003).</p>
+</div>
+<div id="introduction" class="section level1">
+<h1>1. Introduction</h1>
+<div id="background" class="section level2">
+<h2>1.1 Background</h2>
+<p>In count data analysis, the Poisson regression model is the standard
+approach when successive events occur independently at the same rate. A
+unique feature of the Poisson distribution is
+<strong>equi-dispersion</strong>: the mean and variance are equal.
+However, real-world data often violates this assumption:</p>
+<ul>
+<li><strong>Overdispersion</strong>: Variance &gt; Mean (dispersion
+parameter &gt; 1)</li>
+<li><strong>Underdispersion</strong>: Variance &lt; Mean (dispersion
+parameter &lt; 1)</li>
+</ul>
+<p>When overdispersion occurs, the Negative Binomial (NB) model is
+commonly recommended. For cases with excess zeros, Zero-Inflated models
+(ZIP, ZINB) are used. However, these models have limitations,
+particularly when handling complex dispersion patterns.</p>
+</div>
+<div id="the-complex-triparametric-pearson-ctp-distribution" class="section level2">
+<h2>1.2 The Complex TriParametric Pearson (CTP) Distribution</h2>
+<p>The CTP distribution, introduced by Rodríguez-Avi et al. (2003),
+belongs to the Pearson discrete distribution family and is derived from
+the Gaussian Hypergeometric Probability Distribution (GHPD). Unlike
+Poisson-based mixtures, the CTP provides a fundamentally different
+approach to modeling count data.</p>
+<div id="mathematical-definition" class="section level3">
+<h3>Mathematical Definition</h3>
+<p>The CTP distribution has probability mass function:</p>
+<p><span class="math display">\[f(x|a,b,\gamma) = f_0
+\frac{\Gamma(a+ib+x) \Gamma(a-ib+x)}{\Gamma(\gamma+x) \cdot x!}, \quad x
+= 0, 1, 2, ...\]</span></p>
+<p>where: - <span class="math inline">\(a \in \mathbb{R}\)</span> (real
+parameter, can be negative) - <span class="math inline">\(b \geq
+0\)</span> (imaginary parameter) - <span class="math inline">\(\gamma
+&gt; 2a + 2\)</span> (shape parameter, ensures variance exists) - <span class="math inline">\(i\)</span> is the imaginary unit - <span class="math inline">\(f_0\)</span> is the normalizing constant:</p>
+<p><span class="math display">\[f_0 =
+\frac{\Gamma(\gamma-a-ib)\Gamma(\gamma-a+ib)}{\Gamma(\gamma)\Gamma(\gamma-2a)}\]</span></p>
+</div>
+<div id="moments" class="section level3">
+<h3>Moments</h3>
+<p>The distribution has closed-form expressions for its moments:</p>
+<p><strong>Mean:</strong> <span class="math display">\[\mu = \frac{a^2 +
+b^2}{\gamma - 2a - 1}\]</span></p>
+<p><strong>Variance:</strong> <span class="math display">\[\sigma^2 =
+\frac{\mu(\mu + \gamma - 1)}{\gamma - 2a - 2}\]</span></p>
+<p><strong>Dispersion:</strong> - Equidispersed if <span class="math inline">\(a = -\frac{\mu + 1}{2}\)</span> - Underdispersed
+if <span class="math inline">\(a &lt; -\frac{\mu + 1}{2}\)</span> -
+Overdispersed if <span class="math inline">\(a &gt; -\frac{\mu +
+1}{2}\)</span></p>
+<p>Notably, the CTP is overdispersed whenever <span class="math inline">\(a \geq 0\)</span>.</p>
+</div>
+</div>
+<div id="why-zmctp" class="section level2">
+<h2>1.3 Why zmctp?</h2>
+<div id="problem-with-existing-implementations" class="section level3">
+<h3>Problem with Existing Implementations</h3>
+<p>The <code>cpd</code> package (available on CRAN) implements the CTP
+distribution but has a significant limitation: <strong>when fitting data
+with large sample sizes or zero-inflation, it often estimates <span class="math inline">\(b \approx 0\)</span></strong>, which reduces the
+model to a simpler form and loses flexibility.</p>
+</div>
+<div id="the-zmctp-solution" class="section level3">
+<h3>The zmctp Solution</h3>
+<p>This package addresses these limitations through:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Robust optimization</strong> with reparameterization (<span class="math inline">\(\gamma = 2a + 2 + e^\eta\)</span>)</li>
+<li><strong>Zero-Modified CTP</strong> for excess/deficit zeros</li>
+<li><strong>Better handling</strong> of small <span class="math inline">\(b\)</span> values</li>
+<li><strong>Comprehensive diagnostics</strong> and visualization
+tools</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="basic-usage" class="section level1">
+<h1>2. Basic Usage</h1>
+<div id="distribution-functions" class="section level2">
+<h2>2.1 Distribution Functions</h2>
+<p>The package provides standard distribution functions following R
+conventions:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Probability mass function</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">dctp</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; [1] 0.698789363 0.174697341 0.061871975 0.027253132 0.013839481 0.007765487</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Cumulative distribution function</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">pctp</span>(<span class="dv">3</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; [1] 0.9626118</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Quantile function (inverse CDF)</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">qctp</span>(<span class="fu">c</span>(<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>), <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; [1] 0 0 1</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Random generation</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rctp</span>(<span class="dv">30</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Sample mean:&quot;</span>, <span class="fu">mean</span>(x), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">Sample variance:&quot;</span>, <span class="fu">var</span>(x), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; Sample mean: 0.9333333 </span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; Sample variance: 3.443678</span></span></code></pre></div>
+</div>
+<div id="checking-for-overdispersion" class="section level2">
+<h2>2.2 Checking for Overdispersion</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Generate overdispersed data</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>x_over <span class="ot">&lt;-</span> <span class="fu">rctp</span>(<span class="dv">20</span>, <span class="at">a =</span> <span class="fl">1.2</span>, <span class="at">b =</span> <span class="fl">0.3</span>, <span class="at">gama =</span> <span class="dv">6</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">head</span>(x_over)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; [1] 0 0 1 1 1 0</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Calculate dispersion index</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>dispersion_index <span class="ot">&lt;-</span> <span class="fu">var</span>(x_over) <span class="sc">/</span> <span class="fu">mean</span>(x_over)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Dispersion Index:&quot;</span>, dispersion_index, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; Dispersion Index: 0.6842105</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="cf">if</span> (dispersion_index <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Data is OVERDISPERSED</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (dispersion_index <span class="sc">&lt;</span> <span class="dv">1</span>) {</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Data is UNDERDISPERSED</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Data is EQUIDISPERSED</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>}</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; Data is UNDERDISPERSED</span></span></code></pre></div>
+</div>
+<div id="fitting-the-ctp-model" class="section level2">
+<h2>2.3 Fitting the CTP Model</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Fit CTP model to moderate-sized data</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>x_over <span class="ot">&lt;-</span> <span class="fu">rctp</span>(<span class="dv">200</span>, <span class="at">a =</span> <span class="fl">1.2</span>, <span class="at">b =</span> <span class="fl">0.3</span>, <span class="at">gama =</span> <span class="dv">6</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>fit_ctp <span class="ot">&lt;-</span> <span class="fu">ctp.fit</span>(x_over)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">print</span>(fit_ctp)</span></code></pre></div>
+<pre><code>CTP Distribution - Maximum Likelihood Estimates
+===============================================
+
+Parameter Estimates:
+     Estimate Std.Error
+a      1.4593    0.3585
+b      0.0011    0.0000
+gama   8.5912    3.1878
+
+Goodness-of-Fit Statistics:
+  Log-Likelihood: -178.1003
+  AIC: 362.2006
+  BIC: 372.0956
+  Pearson Chi-sq: 19.6799
+  Wald Chi-sq: 189.8432
+
+Convergence: YES</code></pre>
+</div>
+<div id="diagnostic-plots" class="section level2">
+<h2>2.4 Diagnostic Plots</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">plot</span>(fit_ctp, <span class="at">type =</span> <span class="st">&quot;frequency&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">plot</span>(fit_ctp, <span class="at">type =</span> <span class="st">&quot;cdf&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">plot</span>(fit_ctp, <span class="at">type =</span> <span class="st">&quot;qq&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="zero-modified-ctp-distribution" class="section level1">
+<h1>3. Zero-Modified CTP Distribution</h1>
+<div id="when-to-use-zm-ctp" class="section level2">
+<h2>3.1 When to Use ZM-CTP</h2>
+<p>Use the Zero-Modified CTP when:</p>
+<ul>
+<li>Data has <strong>excess zeros</strong> (zero-inflation)</li>
+<li>Data has <strong>deficit of zeros</strong> (zero-deflation)</li>
+<li>Standard CTP estimates <span class="math inline">\(b \approx
+0\)</span>
+<ul>
+<li>Over-dispersion is caused by zero-inflation</li>
+</ul></li>
+</ul>
+</div>
+<div id="mathematical-definition-1" class="section level2">
+<h2>3.2 Mathematical Definition</h2>
+<p>The ZM-CTP probability mass function is:</p>
+<p><span class="math display">\[P(X=0) = \omega + (1-\omega)
+P_{CTP}(0)\]</span> <span class="math display">\[P(X=k) = (1-\omega)
+P_{CTP}(k), \quad k &gt; 0\]</span></p>
+<p>where <span class="math inline">\(0 &lt; \omega &lt; 1\)</span> is
+the zero-modification parameter.</p>
+<p><strong>Interpretation:</strong> - <span class="math inline">\(\omega
+&gt; 0.5\)</span>: Zero-inflation - <span class="math inline">\(\omega
+&lt; 0.5\)</span>: Zero-deflation - <span class="math inline">\(\omega
+\approx 0\)</span>: Standard CTP is sufficient</p>
+</div>
+<div id="example-zero-inflated-data" class="section level2">
+<h2>3.3 Example: Zero-Inflated Data</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Generate zero-inflated data</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>x_zi <span class="ot">&lt;-</span> <span class="fu">rzictp</span>(<span class="dv">300</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">6</span>, <span class="at">omega =</span> <span class="fl">0.3</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Proportion of zeros:&quot;</span>, <span class="fu">mean</span>(x_zi <span class="sc">==</span> <span class="dv">0</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Expected P(X=0) under CTP:&quot;</span>, <span class="fu">dctp</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.5</span>, <span class="dv">6</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>fit_ctp <span class="ot">&lt;-</span> <span class="fu">ctp.fit</span>(x_zi)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>fit_zm <span class="ot">&lt;-</span> <span class="fu">zictp.fit</span>(x_zi)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">summary</span>(fit_zm)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Standard CTP AIC:&quot;</span>, fit_ctp<span class="sc">$</span>AIC, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;ZM-CTP AIC:&quot;</span>, fit_zm<span class="sc">$</span>AIC, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Omega estimate:&quot;</span>, fit_zm<span class="sc">$</span>estimates[<span class="st">&quot;omega&quot;</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>Proportion of zeros: 0.7966667 
+Expected P(X=0) under CTP: 0.7570218 
+
+=== Zero-Modified CTP Distribution Fit Summary ===
+
+
+Zero-Modified CTP Distribution - Maximum Likelihood Estimates
+=============================================================
+
+Parameter Estimates:
+      Estimate Std.Error
+a       2.5646        NA
+b       0.0017        NA
+gama   16.8737        NA
+omega   0.4656        NA
+
+Goodness-of-Fit Statistics:
+  Log-Likelihood: -216.5545
+  AIC: 441.1090
+  BIC: 455.9241
+  Pearson Chi-sq: 2.7242
+  Wald Chi-sq: 287.6122
+
+Convergence: YES 
+
+--- Moments ---
+  Mean: 0.3271 (empirical: 0.3267)
+  Variance: 0.6467 (empirical: 0.6220)
+  P(X=0): 0.7967 (empirical: 0.7967)
+
+--- Observed vs Expected Frequencies ---
+  x Freq    expected
+1 0  239 239.0001656
+2 1   40  38.7105351
+3 2   11  13.7597381
+4 3    5   5.0633781
+5 4    4   1.9722958
+6 5    1   0.8143692
+
+Standard CTP AIC: 440.03 
+ZM-CTP AIC: 441.109 
+Omega estimate: 0.4656324</code></pre>
+</div>
+</div>
+<div id="comparison-with-cpd-package" class="section level1">
+<h1>5. Comparison with cpd Package</h1>
+<div id="the-problem-with-large-sample-sizes" class="section level2">
+<h2>5.1 The Problem with Large Sample Sizes</h2>
+<p>From Oladoja (2021):</p>
+<blockquote>
+<p>“Data sets previously utilized while fitting this model have sample
+sizes that are less than 2000. In this study, the CTP was fitted to
+different over-dispersed and under-dispersed count data sets with both
+small and large sample sizes.”</p>
+</blockquote>
+<blockquote>
+<p>“The ‘cpd’ package in R… estimated the parameter b as 0 for cases
+where the sample size n is large.”</p>
+</blockquote>
+</div>
+<div id="demonstration" class="section level2">
+<h2>5.2 Demonstration</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Install cpd if needed</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># install.packages(&quot;cpd&quot;)</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">library</span>(zmctp)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># Generate data where cpd struggles</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>x_problem <span class="ot">&lt;-</span> <span class="fu">rzictp</span>(<span class="dv">2000</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.001</span>, <span class="at">gama =</span> <span class="dv">8</span>, <span class="at">omega =</span> <span class="fl">0.2</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># Compare results</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>cpd_fit <span class="ot">&lt;-</span> cpd<span class="sc">::</span><span class="fu">fitctp</span>(x_problem, <span class="at">astart=</span><span class="dv">1</span>, <span class="at">bstart=</span><span class="fl">0.001</span>, <span class="at">gammastart=</span><span class="dv">8</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>zmctp_fit <span class="ot">&lt;-</span> <span class="fu">zictp.fit</span>(x_problem)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;cpd b estimate:&quot;</span>, cpd_fit<span class="sc">$</span>coefficients[<span class="dv">2</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;zmctp b estimate:&quot;</span>, zmctp_fit<span class="sc">$</span>estimates[<span class="st">&quot;b&quot;</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;zmctp omega estimate:&quot;</span>, zmctp_fit<span class="sc">$</span>estimates[<span class="st">&quot;omega&quot;</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>
+cpd b estimate: 8.072796e-07 
+zmctp b estimate: 0.0007942037 
+zmctp omega estimate: 0.04831814</code></pre>
+</div>
+</div>
+<div id="model-selection-guide" class="section level1">
+<h1>6. Model Selection Guide</h1>
+<div id="decision-tree" class="section level2">
+<h2>6.1 Decision Tree</h2>
+<pre><code>Is your data count data?
+  ├─ NO → Use appropriate model for your data type
+└─ YES → Calculate Dispersion Index (DI = variance/mean)
+├─ DI ≈ 1 → Poisson
+├─ DI &gt; 1 (Over-dispersed)
+│   ├─ Excess zeros? → Try ZIP, ZINB, ZM-CTP
+│   ├─ Excess non-zeros? → Try CTP, NB
+│   └─ Large n &amp; b→0 in cpd? → Use zmctp!
+  └─ DI &lt; 1 (Under-dispersed) → Try CTP</code></pre>
+</div>
+</div>
+<div id="properties-and-theoretical-results" class="section level1">
+<h1>7. Properties and Theoretical Results</h1>
+<div id="skewness" class="section level2">
+<h2>7.1 Skewness</h2>
+<p>The CTP distribution has <strong>positive skewness</strong>:</p>
+<p><span class="math display">\[\mu_3 = \frac{(a^2 + b^2)[4b^2 + (\gamma
+- 1)^2] + [b^2 + (\gamma - 1 - a)^2]}{(\gamma - 2a - 1)^3(\gamma - 2a -
+2)(\gamma - 2a - 3)}\]</span></p>
+<p>Since both numerator and denominator are always positive, the
+distribution is right-skewed.</p>
+</div>
+<div id="mode" class="section level2">
+<h2>7.2 Mode</h2>
+<p>The distribution is uni-modal at:</p>
+<p><span class="math display">\[y = \left\lfloor \frac{(a-1)^2 +
+b^2}{\gamma - 2a + 1} \right\rfloor\]</span></p>
+<p>## 7.3 Convergence</p>
+<p>The CTP distribution converges to: - <strong>Poisson</strong> when
+<span class="math inline">\(\gamma\)</span> and <span class="math inline">\(a^2 + b^2 \rightarrow \infty\)</span> at the same
+rate - <strong>Normal</strong> when <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\sqrt{a^2 + b^2}\)</span> have the same order of
+convergence # 9. Conclusion</p>
+<p>The <strong>zmctp</strong> package provides a robust implementation
+of the CTP distribution that:</p>
+<p>✅ Handles both over-dispersion and under-dispersion<br />
+✅ Works with large sample sizes (n &gt; 2000)<br />
+✅ Addresses the b → 0 problem in existing implementations<br />
+✅ Provides zero-modified variants for zero-inflated data<br />
+✅ Includes comprehensive diagnostics and visualization</p>
+</div>
+<div id="key-findings-from-oladoja-2021" class="section level2">
+<h2>9.1 Key Findings from Oladoja (2021)</h2>
+<blockquote>
+<p>“The CTP produced similar fit to the NB model while correcting for
+over-dispersion caused by excess zeros but is a better fit than the NB
+when over-dispersion is caused by excessive non-zero values in a data
+set.”</p>
+</blockquote>
+<blockquote>
+<p>“The CTP model behaved better with under-dispersed data sets than the
+Poisson model.”</p>
+</blockquote>
+<blockquote>
+<p>“The package ‘cpd’ in R estimates b as 0 for zero-inflated data sets
+while the program utilized in this study works well.”</p>
+</blockquote>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>Böhning, D., Dietz, E., &amp; Schlattmann, P. (1999). The
+zero-inflated Poisson model and the decayed, missing and filled teeth
+index in dental epidemiology. <em>Journal of the Royal Statistical
+Society: Series A</em>, 162(2), 195-209.</p>
+<p>Deb, P., &amp; Trivedi, P. K. (1997). Demand for medical care by the
+elderly: a finite mixture approach. <em>Journal of Applied
+Econometrics</em>, 12(3), 313-336.</p>
+<p>Oladoja, R. O. (2021). Complex Tri-Parametric Pearson Distribution
+and Its Applications. <em>M.Sc. Thesis</em>, Kwara State University,
+Malete, Nigeria.</p>
+<p>Rodríguez-Avi, J., Conde-Sánchez, A., &amp; Sáez-Castillo, A. J.
+(2003). A new class of discrete distributions with complex parameters.
+<em>Statistical Papers</em>, 44(1), 67-88. <a href="https://doi.org/10.1007/s00362-002-0134-7" class="uri">https://doi.org/10.1007/s00362-002-0134-7</a></p>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; R version 4.5.1 (2025-06-13 ucrt)</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; Running under: Windows 11 x64 (build 26200)</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt;   LAPACK version 3.12.1</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=C                          </span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; time zone: America/Chicago</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; [1] zmctp_0.1.0</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt;  [1] digest_0.6.39     R6_2.6.1          fastmap_1.2.0     xfun_0.53        </span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt;  [5] cachem_1.1.0      knitr_1.51        htmltools_0.5.9   rmarkdown_2.30   </span></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt;  [9] lifecycle_1.0.4   cli_3.6.5         sass_0.4.10       jquerylib_0.1.4  </span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; [13] compiler_4.5.1    rstudioapi_0.17.1 tools_4.5.1       evaluate_1.0.5   </span></span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co">#&gt; [17] bslib_0.9.0       yaml_2.3.12       otel_0.2.0        jsonlite_2.0.0   </span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="co">#&gt; [21] rlang_1.1.6</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
