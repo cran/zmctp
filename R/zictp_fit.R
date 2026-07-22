@@ -73,7 +73,12 @@ zictp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
       return(1e10)
     }
     # Note: a can be any real; only b must be >= 0
-    if (b < 0) {
+    # FIX: added explicit gama <= 0 check, matching the equivalent fix in
+    # ctp.fit(). Previously, gama = 2*a+2+exp(eta) was not directly checked
+    # for positivity here either; for sufficiently negative a combined with
+    # small eta, gama could be negative, which is an invalid parameter
+    # value not otherwise guaranteed to be caught before reaching dctp().
+    if (b < 0 || gama <= 0) {
       return(1e10)
     }
     

@@ -2,28 +2,23 @@
 # FILE: R/moments.R  
 # =============================================================================
 
-#' Theoretical moments and mode of the CTP distribution
+#' Theoretical moments of the CTP distribution
 #'
 #' @param a,b,gama CTP parameters.
 #'
 #' @details
-#' \code{mode_ctp()} returns the unimodal-case mode (rounded). The
-#' distribution has two consecutive modes in the knife-edge case where
-#' \code{((a-1)^2+b^2)/(gama-2*a+1)} is exactly an integer; this edge case
-#' is not separately flagged.
-#'
 #' These functions do not validate that the parameter constraints required
 #' for a given moment to exist are satisfied (e.g. \code{gama > 2*a+2} for
 #' the variance, \code{gama > 2*a+3} for the skewness). Outside these
 #' regions the returned value may be \code{Inf}, \code{NaN}, or negative;
 #' see \code{\link{dctp}} for the corresponding existence warnings applied
-#' at the density level.
+#' at the density level. See \code{\link{mode_ctp}} for the mode, including
+#' its tie-case handling.
 #'
 #' @examples
 #' mean_ctp(a = 1, b = 0.5, gama = 6)
 #' var_ctp(a = 1, b = 0.5, gama = 6)
 #' skew_ctp(a = 1, b = 0.5, gama = 6)
-#' mode_ctp(a = 1, b = 0.5, gama = 6)
 #'
 #' @export
 mean_ctp <- function(a, b, gama) (a^2 + b^2) / (gama - 2*a - 1)
@@ -31,28 +26,48 @@ mean_ctp <- function(a, b, gama) (a^2 + b^2) / (gama - 2*a - 1)
 #' @rdname mean_ctp
 #' @export
 var_ctp <- function(a, b, gama) {
-  mu <- mean_ctp(a, b, gama)
-  mu * (mu + gama - 1) / (gama - 2*a - 2)
+  (a^2 + b^2) * ((gama - 1 - a)^2 + b^2) / ((gama - 2*a - 1)^2 * (gama - 2*a - 2))
 }
 
 #' @rdname mean_ctp
 #' @export
 skew_ctp <- function(a, b, gama) {
-  mu3 <- ((a^2+b^2)*(4*b^2+(gama-1)^2) + (b^2+(gama-1-a)^2)) /
+  mu3 <- (a^2+b^2) * (4*b^2+(gama-1)^2) * ((gama-1-a)^2+b^2) /
     ((gama-2*a-1)^3 * (gama-2*a-2) * (gama-2*a-3))
   mu3 / var_ctp(a, b, gama)^1.5
 }
 
-#' @rdname mean_ctp
+#' Mode of the CTP distribution
+#'
+#' @param a alpha parameter
+#' @param b b parameter (b >= 0)
+#' @param gama gamma parameter
+#' @return the mode (a single integer), or, in the exact tie case,
+#'   a numeric vector of length 2 giving both consecutive modes
 #' @export
 mode_ctp <- function(a, b, gama) {
-  round(((a-1)^2 + b^2) / (gama - 2*a + 1))
+  y0 <- (a^2 + b^2 - gama) / (gama - 2*a + 1)
+  
+  if (y0 < 0) {
+    return(0L)
+  }
+  
+  # Check for the exact tie case (y0 is an integer) using a small
+  # numerical tolerance, since y0 is a floating-point calculation
+  tol <- 1e-8
+  if (abs(y0 - round(y0)) < tol) {
+    y0_int <- round(y0)
+    return(c(y0_int, y0_int + 1))  # two consecutive modes
+  }
+  
+  # Generic case: mode is the ceiling of y0
+  return(as.integer(ceiling(y0)))
 }
 
-#' Theoretical moments and mode of the ZM-CTP distribution
+#' Theoretical moments and mode of the ZI-CTP distribution
 #'
 #' @param a,b,gama CTP parameters.
-#' @param omega Zero-modification parameter.
+#' @param omega Zero-inflation parameter.
 #'
 #' @details
 #' These functions do not validate that the parameter constraints required
@@ -97,11 +112,36 @@ skew_zictp <- function(a, b, gama, omega) {
   mu3_zm / var_zictp(a, b, gama, omega)^1.5
 }
 
-#' @rdname mean_zictp
+#' Mode of the ZI-CTP distribution
+#'
+#' @param a alpha parameter
+#' @param b b parameter (b >= 0)
+#' @param gama gamma parameter
+#' @param omega zero-inflation parameter
+#' @return the mode (a single integer)
 #' @export
 mode_zictp <- function(a, b, gama, omega) {
+  y_star <- mode_ctp(a, b, gama)
+  
+  # Handle the rare tie case from mode_ctp() by using the smaller
+  # of the two consecutive modes for this comparison (a reasonable,
+  # documented convention -- see package documentation)
+  if (length(y_star) > 1) {
+    y_star <- y_star[1]
+  }
+  
+  if (y_star == 0) {
+    return(0L)  # mode is trivially 0 already
+  }
+  
   f0 <- dctp(0, a, b, gama)
-  ystar <- mode_ctp(a, b, gama)
-  fystar <- dctp(ystar, a, b, gama)
-  if (omega / (1 - omega) >= fystar - f0) 0 else ystar
+  f_ystar <- dctp(y_star, a, b, gama)
+  
+  threshold <- omega / (1 - omega)
+  
+  if (threshold >= (f_ystar - f0)) {
+    return(0L)
+  } else {
+    return(as.integer(y_star))
+  }
 }

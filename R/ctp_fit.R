@@ -71,7 +71,13 @@ ctp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
     # basic domain checks (return penalty if invalid)
     # Note: a can be any real number (negative a gives under-dispersion)
     if (!is.finite(a) || !is.finite(b) || !is.finite(gama)) return(penalty)
-    if (b <= 0 || exp(eta) <= 0) return(penalty)
+    # FIX: added explicit gama <= 0 check. Previously, gama = 2*a+2+exp(eta)
+    # was not directly checked for positivity; for sufficiently negative a
+    # combined with small eta, gama could be negative, which is an invalid
+    # parameter value not otherwise guaranteed to be caught before reaching
+    # dctp(). b is already correctly constrained via the L-BFGS-B lower
+    # bound below, so no separate b <= 0 check is needed here.
+    if (b <= 0 || exp(eta) <= 0 || gama <= 0) return(penalty)
     
     # call user-provided density; dctp must accept log=TRUE
     log_probs <- tryCatch({

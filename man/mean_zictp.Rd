@@ -4,24 +4,21 @@
 \alias{mean_zictp}
 \alias{var_zictp}
 \alias{skew_zictp}
-\alias{mode_zictp}
-\title{Theoretical moments and mode of the ZM-CTP distribution}
+\title{Theoretical moments and mode of the ZI-CTP distribution}
 \usage{
 mean_zictp(a, b, gama, omega)
 
 var_zictp(a, b, gama, omega)
 
 skew_zictp(a, b, gama, omega)
-
-mode_zictp(a, b, gama, omega)
 }
 \arguments{
 \item{a, b, gama}{CTP parameters.}
 
-\item{omega}{Zero-modification parameter.}
+\item{omega}{Zero-inflation parameter.}
 }
 \description{
-Theoretical moments and mode of the ZM-CTP distribution
+Theoretical moments and mode of the ZI-CTP distribution
 }
 \details{
 These functions do not validate that the parameter constraints required

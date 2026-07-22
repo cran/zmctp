@@ -2,7 +2,7 @@ Package: zmctp
 Type: Package
 Title: Zero-Modified Complex 'Tri-Parametric' Pearson Distribution for
         Overdispersed Count Data
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person("Rasheedat", "Oladoja",
            email = "roladoja@ttu.edu",
@@ -29,8 +29,8 @@ Maintainer: Rasheedat Oladoja <roladoja@ttu.edu>
 Language: en-US
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2026-07-08 22:22:33 UTC; kemmi
+Packaged: 2026-07-22 15:50:46 UTC; kemmi
 Author: Rasheedat Oladoja [aut, cre] (ORCID:
     <https://orcid.org/0009-0001-5883-8039>)
 Repository: CRAN
-Date/Publication: 2026-07-09 08:10:02 UTC
+Date/Publication: 2026-07-22 16:10:02 UTC
