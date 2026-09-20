@@ -28,6 +28,10 @@ print.ctpfit <- function(x, ...) {
   cat(sprintf("  Wald Chi-sq: %.4f\n", x$wald_chisq))
 
   cat("\nConvergence:", ifelse(x$converged, "YES", "NO"), "\n")
+  if (isTRUE(x$near_boundary)) {
+    cat("WARNING: estimated gama is very close to the variance-existence\n",
+        "         boundary (gama = 2a + 2); this fit may be unreliable.\n", sep = "")
+  }
   invisible(x)
 }
 #' Print method for zictpfit objects
@@ -56,6 +60,10 @@ print.zictpfit <- function(x, ...) {
   cat(sprintf("  Wald Chi-sq: %.4f\n", x$wald_chisq))
 
   cat("\nConvergence:", ifelse(x$converged, "YES", "NO"), "\n")
+  if (isTRUE(x$near_boundary)) {
+    cat("WARNING: estimated gama is very close to the variance-existence\n",
+        "         boundary (gama = 2a + 2); this fit may be unreliable.\n", sep = "")
+  }
   invisible(x)
 }
 #' Summary method for ctpfit objects

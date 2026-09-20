@@ -53,9 +53,21 @@ ctp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
   if (is.null(gama_start)) gama_start <- max(4.0, theta_nb * 1.5 + 2)
   if (is.null(a_start)) a_start <- max(1e-3, mu_emp * (gama_start / (gama_start + mu_emp)))
   if (is.null(b_start)) b_start <- 0.05
-  
-  # reparameterize gama = 2*a + 2 + exp(eta) so variance-existence constraint holds
-  eta_start <- log(max(1e-6, gama_start - 2 * a_start - 2))
+
+  # reparameterize gama = 2*a + 2 + exp(eta) so variance-existence constraint holds.
+  # a_start and gama_start are derived independently, so nothing guarantees
+  # gama_start > 2*a_start + 2. If that margin is <= 0, log(max(1e-6, .)) used to
+  # silently start eta right on the variance-existence singularity (gama = 2a+2),
+  # where the log-density has pathological gradients and L-BFGS-B can get stuck
+  # at a degenerate optimum without any convergence warning. Fall back to a safe
+  # margin instead, and let the user know the heuristic start was inconsistent.
+  margin_start <- gama_start - 2 * a_start - 2
+  if (margin_start <= 1e-4) {
+    warning("Default gama_start is inconsistent with a_start (margin <= 0); ",
+            "falling back to a safe starting margin instead of the singularity boundary.")
+    margin_start <- 2
+  }
+  eta_start <- log(margin_start)
   
   # parameters we optimize: a, b, eta
   start_vals <- c(a = a_start, b = b_start, eta = eta_start)
@@ -97,17 +109,43 @@ ctp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
   lower_bounds <- c(-Inf, 1e-8, -30)   # eta lower ~ exp(-30) ~ 9e-14
   upper_bounds <- c(Inf, Inf,  30)
   
-  fit <- optim(
-    par = start_vals,
-    fn = nll,
-    x = x,
-    method = method,
-    lower = lower_bounds,
-    upper = upper_bounds,
-    hessian = TRUE,
-    control = list(maxit = 10000)
+  # Multi-start: a single heuristic start can still converge to a poor local
+  # optimum even once it's off the singularity boundary. Try a small grid of
+  # alternative (a, eta-margin) combinations and keep whichever run converges
+  # to the best log-likelihood, mirroring zictp.fit()'s multi-start approach.
+  start_grid <- list(
+    start_vals,
+    c(a = a_start, b = b_start, eta = log(5)),
+    c(a = max(1e-3, 0.5 * a_start), b = b_start,
+      eta = log(max(2, gama_start - 2 * max(1e-3, 0.5 * a_start) - 2))),
+    c(a = 1.5 * a_start, b = b_start,
+      eta = log(max(2, gama_start - 2 * (1.5 * a_start) - 2)))
   )
-  
+
+  fits <- lapply(start_grid, function(st) {
+    tryCatch(
+      optim(
+        par = st,
+        fn = nll,
+        x = x,
+        method = method,
+        lower = lower_bounds,
+        upper = upper_bounds,
+        hessian = TRUE,
+        control = list(maxit = 10000)
+      ),
+      error = function(e) NULL
+    )
+  })
+
+  valid_fits <- Filter(function(f) !is.null(f) && is.finite(f$value) && f$value < penalty, fits)
+  if (length(valid_fits) == 0) {
+    # keep the primary start's result so downstream NA-handling still applies
+    fit <- fits[[1]]
+  } else {
+    fit <- valid_fits[[which.min(vapply(valid_fits, function(f) f$value, numeric(1)))]]
+  }
+
   # convert back to natural params
   est_raw <- fit$par
   est <- numeric(3)
@@ -115,7 +153,17 @@ ctp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
   est["a"] <- est_raw["a"]
   est["b"] <- est_raw["b"]
   est["gama"] <- 2 * est["a"] + 2 + exp(est_raw["eta"])
-  
+
+  # post-fit sanity check: gama landing right on the variance-existence
+  # boundary (gama = 2a + 2) means the fitted variance is effectively
+  # undefined/unstable even though optim() reported convergence.
+  boundary_margin <- unname(est["gama"] - 2 * est["a"] - 2)
+  near_boundary <- is.finite(boundary_margin) && boundary_margin < 1e-3
+  if (near_boundary) {
+    warning("Estimated gama is very close to the variance-existence boundary ",
+            "(gama - 2a - 2 = ", signif(boundary_margin, 3), "); the fit may be unreliable.")
+  }
+
   # logLik handling: if optimizer returned penalty, mark as NA
   if (!is.null(fit$value) && is.finite(fit$value) && fit$value < penalty) {
     logLik <- -fit$value
@@ -222,6 +270,7 @@ ctp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
     fitted_freq = obs_freq,
     data = x,
     converged = (is.numeric(fit$convergence) && fit$convergence == 0),
+    near_boundary = near_boundary,
     method = method,
     raw_optim = fit
   )

@@ -72,25 +72,36 @@ dctp <- function(x, a, b, gama, log = FALSE) {
     }
   }
   
-  # Extend tail until negligible for normalization
-  tail_w <- w
+  # Extend tail until negligible for normalization.
+  # Preallocate the extension buffer instead of growing it one element at a
+  # time via c(): near the gama = 2*a + 2 boundary the tail decays very
+  # slowly and can need close to the full 10000-term cap, and repeated
+  # vector growth there is O(n^2) -- easily seconds per call, which then
+  # multiplies out to minutes/hours across an optimizer's function
+  # evaluations.
+  extra_cap <- 10000L
+  tail_extra <- numeric(extra_cap)
+  last_w <- w[max_x + 1L]
   k <- max_x
+  n_extra <- 0L
   repeat {
     ratio <- ((a + k)^2 + b^2) / ((gama + k) * (k + 1))
-    next_w <- tail_w[length(tail_w)] * ratio
-    
+    next_w <- last_w * ratio
+
     if (!is.finite(next_w) || next_w < 0) {
       stop("Failed while computing normalization tail.")
     }
-    
-    tail_w <- c(tail_w, next_w)
+
+    n_extra <- n_extra + 1L
+    tail_extra[n_extra] <- next_w
+    last_w <- next_w
     k <- k + 1L
-    
+
     # stop when the added term is tiny
-    if (next_w < 1e-12 || k > max_x + 10000L) break
+    if (next_w < 1e-12 || n_extra >= extra_cap) break
   }
-  
-  denom <- sum(tail_w)
+
+  denom <- sum(w) + sum(tail_extra[seq_len(n_extra)])
   if (!is.finite(denom) || denom <= 0) {
     stop("Failed to compute a valid normalization constant.")
   }

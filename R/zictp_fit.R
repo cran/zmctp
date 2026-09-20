@@ -114,16 +114,34 @@ zictp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
     -(ll_zero + ll_positive)
   }
   
+  # Reparameterized eta must satisfy gama = 2*a + 2 + exp(eta) > 2*a + 2 for the
+  # variance to exist. gama_start/a_start (and their perturbed variants below)
+  # are derived independently, so the margin gama - 2*a - 2 can go negative;
+  # log(max(1e-6, .)) used to silently start eta right on that singularity,
+  # where L-BFGS/BFGS gets pathological gradients and can get stuck without any
+  # convergence warning (same failure mode as in ctp.fit()). Fall back to a safe
+  # margin instead whenever the heuristic margin is non-positive.
+  safe_eta_start <- function(gama_s, a_s, safe_margin = 2) {
+    margin <- gama_s - 2 * a_s - 2
+    if (margin <= 1e-4) margin <- safe_margin
+    log(margin)
+  }
+
   # base start
-  eta_start <- log(max(1e-6, gama_start - 2 * a_start - 2))
+  eta_start <- safe_eta_start(gama_start, a_start)
   delta_start <- qlogis(omega_start)
-  
+
+  a_alt1 <- max(0.05, 0.5 * a_start)
+  a_alt2 <- max(0.05, 1.5 * a_start)
+  a_alt3 <- max(0.05, mu_emp / 4)
+  a_alt4 <- max(0.05, mu_emp / 2)
+
   start_grid <- list(
-    c(a = a_start,          b = b_start,          eta = eta_start,                                      delta = delta_start),
-    c(a = max(0.05, 0.5*a_start), b = max(0.05, 0.5*b_start), eta = log(max(1e-6, gama_start - 2*(max(0.05, 0.5*a_start)) - 2)), delta = qlogis(min(0.95, max(0.01, 0.5*omega_start)))),
-    c(a = max(0.05, 1.5*a_start), b = max(0.05, 1.5*b_start), eta = log(max(1e-6, (gama_start + 1) - 2*(max(0.05, 1.5*a_start)) - 2)), delta = qlogis(min(0.95, max(0.01, 1.5*omega_start)))),
-    c(a = max(0.05, mu_emp/4),    b = max(0.05, stats::sd(x)/5), eta = log(max(1e-6, 6 - 2*(max(0.05, mu_emp/4)) - 2)),         delta = qlogis(0.05)),
-    c(a = max(0.05, mu_emp/2),    b = max(0.05, stats::sd(x)/3), eta = log(max(1e-6, 8 - 2*(max(0.05, mu_emp/2)) - 2)),         delta = qlogis(0.20))
+    c(a = a_start,  b = b_start,                    eta = eta_start,                             delta = delta_start),
+    c(a = a_alt1,   b = max(0.05, 0.5*b_start),      eta = safe_eta_start(gama_start, a_alt1),     delta = qlogis(min(0.95, max(0.01, 0.5*omega_start)))),
+    c(a = a_alt2,   b = max(0.05, 1.5*b_start),      eta = safe_eta_start(gama_start + 1, a_alt2), delta = qlogis(min(0.95, max(0.01, 1.5*omega_start)))),
+    c(a = a_alt3,   b = max(0.05, stats::sd(x)/5),   eta = safe_eta_start(6, a_alt3),              delta = qlogis(0.05)),
+    c(a = a_alt4,   b = max(0.05, stats::sd(x)/3),   eta = safe_eta_start(8, a_alt4),              delta = qlogis(0.20))
   )
   
   fits <- lapply(start_grid, function(st) {
@@ -153,7 +171,17 @@ zictp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
   
   gama_hat <- 2 * a_hat + 2 + exp(eta_hat)
   omega_hat <- plogis(delta_hat)
-  
+
+  # post-fit sanity check: gama landing right on the variance-existence
+  # boundary (gama = 2a + 2) means the fitted variance is effectively
+  # undefined/unstable even though optim() reported convergence.
+  boundary_margin <- gama_hat - 2 * a_hat - 2
+  near_boundary <- is.finite(boundary_margin) && boundary_margin < 1e-3
+  if (near_boundary) {
+    warning("Estimated gama is very close to the variance-existence boundary ",
+            "(gama - 2a - 2 = ", signif(boundary_margin, 3), "); the fit may be unreliable.")
+  }
+
   est <- c(a = a_hat, b = b_hat, gama = gama_hat, omega = omega_hat)
   
   vcov_mat <- NULL
@@ -243,10 +271,11 @@ zictp.fit <- function(x, a_start = NULL, b_start = NULL, gama_start = NULL,
     fitted_freq = obs_freq,
     data = x,
     converged = (fit$convergence == 0),
+    near_boundary = near_boundary,
     method = method,
     raw_optim = fit
   )
-  
+
   class(result) <- "zictpfit"
   return(result)
 }

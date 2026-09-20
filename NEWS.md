@@ -1,3 +1,42 @@
+# zmctp 0.1.3
+
+## Bug fixes
+
+* Fixed a starting-value inconsistency in `ctp.fit()` that could cause
+  `optim()` to silently converge to a degenerate local optimum for
+  moderately overdispersed data. `a_start` and `gama_start` are derived
+  independently from the sample mean/variance, with nothing guaranteeing
+  `gama_start > 2*a_start + 2`. When that margin was non-positive,
+  `eta_start` was clamped to `log(1e-6)`, pinning the optimizer's start
+  right on the variance-existence singularity (`gama = 2a + 2`), where
+  the log-density has pathological gradients. `ctp.fit()` now falls back
+  to a safe starting margin (with a `warning()`) instead of clamping to
+  the boundary, and additionally tries a small grid of alternative
+  starting points, keeping whichever converges to the best
+  log-likelihood.
+
+* Applied the same safe-margin fallback to the starting-value grid in
+  `zictp.fit()`, which shared the same underlying clamp pattern in each
+  of its multi-start candidates.
+
+* `ctp.fit()` and `zictp.fit()` now flag fits whose estimated `gama` is
+  very close to the variance-existence boundary (`gama - 2*a - 2` near
+  zero) with a `warning()`, a `near_boundary` element in the returned
+  object, and a note in `print()`/`summary()` output -- instead of
+  silently reporting `Convergence: YES` on an unreliable fit.
+
+* Fixed a severe performance bug in `dctp()`: its normalization-tail loop
+  grew a vector one element at a time via `c()`, which is O(n^2) in R.
+  Near the `gama = 2*a + 2` boundary the tail decays very slowly and can
+  need close to the full 10000-term cap, making individual `dctp()` calls
+  take seconds rather than milliseconds -- and this compounds badly
+  across an optimizer's many function evaluations during `ctp.fit()`/
+  `zictp.fit()`, especially for the exact overdispersed, near-boundary
+  data most likely to trigger the starting-value bug above. The tail
+  buffer is now preallocated; a `dctp()` call near the boundary that
+  previously took ~0.15s now takes ~0.002s, with identical numerical
+  output.
+
 # zmctp 0.1.2
 
 ## Bug fixes
