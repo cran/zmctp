@@ -7,16 +7,18 @@
 mode_ctp(a, b, gama)
 }
 \arguments{
-\item{a}{alpha parameter}
-
-\item{b}{b parameter (b >= 0)}
-
-\item{gama}{gamma parameter}
+\item{a, b, gama}{Scalar parent parameters; see \code{dctp}.}
 }
 \value{
-the mode (a single integer), or, in the exact tie case,
-  a numeric vector of length 2 giving both consecutive modes
+The modal integer, or both adjacent integers in a numerical tie.
 }
 \description{
 Mode of the CTP distribution
+}
+\details{
+Ties are detected to relative tolerance \code{1e-10}. The
+  recurrence minus one changes sign at most once in the valid domain.
+}
+\examples{
+mode_ctp(-1.5, 1.8, 3.8)
 }

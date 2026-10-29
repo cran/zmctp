@@ -10,11 +10,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<meta name="author" content="Rasheedat Oladoja" />
+<meta name="author" content="Rasheedat Oladoja and Kabir Opeyemi Olorede" />
 
-<meta name="date" content="2026-09-20" />
 
-<title>Introduction to zmctp: Zero-Modified Complex Tri-parametric Pearson Distribution</title>
+<title>Likelihood fitting with zmctp</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -50,9 +49,8 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -339,474 +337,146 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Introduction to zmctp: Zero-Modified
-Complex Tri-parametric Pearson Distribution</h1>
-<h4 class="author">Rasheedat Oladoja</h4>
-<h4 class="date">2026-09-20</h4>
+<h1 class="title toc-ignore">Likelihood fitting with zmctp</h1>
+<h4 class="author">Rasheedat Oladoja and Kabir Opeyemi Olorede</h4>
 
 
-<div id="TOC">
-<ul>
-<li><a href="#abstract" id="toc-abstract">Abstract</a></li>
-<li><a href="#introduction" id="toc-introduction">1. Introduction</a>
-<ul>
-<li><a href="#background" id="toc-background">1.1 Background</a></li>
-<li><a href="#the-complex-triparametric-pearson-ctp-distribution" id="toc-the-complex-triparametric-pearson-ctp-distribution">1.2 The
-Complex TriParametric Pearson (CTP) Distribution</a>
-<ul>
-<li><a href="#mathematical-definition" id="toc-mathematical-definition">Mathematical Definition</a></li>
-<li><a href="#moments" id="toc-moments">Moments</a></li>
-</ul></li>
-<li><a href="#why-zmctp" id="toc-why-zmctp">1.3 Why zmctp?</a>
-<ul>
-<li><a href="#problem-with-existing-implementations" id="toc-problem-with-existing-implementations">Problem with Existing
-Implementations</a></li>
-<li><a href="#the-zmctp-solution" id="toc-the-zmctp-solution">The zmctp
-Solution</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#basic-usage" id="toc-basic-usage">2. Basic Usage</a>
-<ul>
-<li><a href="#distribution-functions" id="toc-distribution-functions">2.1 Distribution Functions</a></li>
-<li><a href="#checking-for-overdispersion" id="toc-checking-for-overdispersion">2.2 Checking for
-Overdispersion</a></li>
-<li><a href="#fitting-the-ctp-model" id="toc-fitting-the-ctp-model">2.3
-Fitting the CTP Model</a></li>
-<li><a href="#diagnostic-plots" id="toc-diagnostic-plots">2.4 Diagnostic
-Plots</a></li>
-</ul></li>
-<li><a href="#zero-modified-ctp-distribution" id="toc-zero-modified-ctp-distribution">3. Zero-Modified CTP
-Distribution</a>
-<ul>
-<li><a href="#when-to-use-zm-ctp" id="toc-when-to-use-zm-ctp">3.1 When
-to Use ZM-CTP</a></li>
-<li><a href="#mathematical-definition-1" id="toc-mathematical-definition-1">3.2 Mathematical Definition</a></li>
-<li><a href="#example-zero-inflated-data" id="toc-example-zero-inflated-data">3.3 Example: Zero-Inflated
-Data</a></li>
-</ul></li>
-<li><a href="#comparison-with-cpd-package" id="toc-comparison-with-cpd-package">5. Comparison with cpd Package</a>
-<ul>
-<li><a href="#the-problem-with-large-sample-sizes" id="toc-the-problem-with-large-sample-sizes">5.1 The Problem with Large
-Sample Sizes</a></li>
-<li><a href="#demonstration" id="toc-demonstration">5.2
-Demonstration</a></li>
-</ul></li>
-<li><a href="#model-selection-guide" id="toc-model-selection-guide">6.
-Model Selection Guide</a>
-<ul>
-<li><a href="#decision-tree" id="toc-decision-tree">6.1 Decision
-Tree</a></li>
-</ul></li>
-<li><a href="#properties-and-theoretical-results" id="toc-properties-and-theoretical-results">7. Properties and
-Theoretical Results</a>
-<ul>
-<li><a href="#skewness" id="toc-skewness">7.1 Skewness</a></li>
-<li><a href="#mode" id="toc-mode">7.2 Mode</a></li>
-<li><a href="#key-findings-from-oladoja-2021" id="toc-key-findings-from-oladoja-2021">9.1 Key Findings from Oladoja
-(2021)</a></li>
-</ul></li>
-<li><a href="#references" id="toc-references">References</a></li>
-<li><a href="#session-info" id="toc-session-info">Session Info</a></li>
-</ul>
-</div>
 
-<div id="abstract" class="section level1">
-<h1>Abstract</h1>
-<p>The <strong>zmctp</strong> package extends the Complex Tri-parametric
-Pearson (CTP) distribution with zero-modified versions for overdispersed
-count data. This package addresses limitations of existing
-implementations when the parameter <span class="math inline">\(b\)</span> approaches zero, providing distribution
-functions, maximum likelihood estimation, and diagnostic tools based on
-Rodríguez-Avi et al. (2003).</p>
-</div>
-<div id="introduction" class="section level1">
-<h1>1. Introduction</h1>
-<div id="background" class="section level2">
-<h2>1.1 Background</h2>
-<p>In count data analysis, the Poisson regression model is the standard
-approach when successive events occur independently at the same rate. A
-unique feature of the Poisson distribution is
-<strong>equi-dispersion</strong>: the mean and variance are equal.
-However, real-world data often violates this assumption:</p>
-<ul>
-<li><strong>Overdispersion</strong>: Variance &gt; Mean (dispersion
-parameter &gt; 1)</li>
-<li><strong>Underdispersion</strong>: Variance &lt; Mean (dispersion
-parameter &lt; 1)</li>
-</ul>
-<p>When overdispersion occurs, the Negative Binomial (NB) model is
-commonly recommended. For cases with excess zeros, Zero-Inflated models
-(ZIP, ZINB) are used. However, these models have limitations,
-particularly when handling complex dispersion patterns.</p>
-</div>
-<div id="the-complex-triparametric-pearson-ctp-distribution" class="section level2">
-<h2>1.2 The Complex TriParametric Pearson (CTP) Distribution</h2>
-<p>The CTP distribution, introduced by Rodríguez-Avi et al. (2003),
-belongs to the Pearson discrete distribution family and is derived from
-the Gaussian Hypergeometric Probability Distribution (GHPD). Unlike
-Poisson-based mixtures, the CTP provides a fundamentally different
-approach to modeling count data.</p>
-<div id="mathematical-definition" class="section level3">
-<h3>Mathematical Definition</h3>
-<p>The CTP distribution has probability mass function:</p>
-<p><span class="math display">\[f(x|a,b,\gamma) = f_0
-\frac{\Gamma(a+ib+x) \Gamma(a-ib+x)}{\Gamma(\gamma+x) \cdot x!}, \quad x
-= 0, 1, 2, ...\]</span></p>
-<p>where: - <span class="math inline">\(a \in \mathbb{R}\)</span> (real
-parameter, can be negative) - <span class="math inline">\(b \geq
-0\)</span> (imaginary parameter) - <span class="math inline">\(\gamma
-&gt; 2a + 2\)</span> (shape parameter, ensures variance exists) - <span class="math inline">\(i\)</span> is the imaginary unit - <span class="math inline">\(f_0\)</span> is the normalizing constant:</p>
-<p><span class="math display">\[f_0 =
-\frac{\Gamma(\gamma-a-ib)\Gamma(\gamma-a+ib)}{\Gamma(\gamma)\Gamma(\gamma-2a)}\]</span></p>
-</div>
-<div id="moments" class="section level3">
-<h3>Moments</h3>
-<p>The distribution has closed-form expressions for its moments:</p>
-<p><strong>Mean:</strong> <span class="math display">\[\mu = \frac{a^2 +
-b^2}{\gamma - 2a - 1}\]</span></p>
-<p><strong>Variance:</strong> <span class="math display">\[\sigma^2 =
-\frac{\mu(\mu + \gamma - 1)}{\gamma - 2a - 2}\]</span></p>
-<p><strong>Dispersion:</strong> - Equidispersed if <span class="math inline">\(a = -\frac{\mu + 1}{2}\)</span> - Underdispersed
-if <span class="math inline">\(a &lt; -\frac{\mu + 1}{2}\)</span> -
-Overdispersed if <span class="math inline">\(a &gt; -\frac{\mu +
-1}{2}\)</span></p>
-<p>Notably, the CTP is overdispersed whenever <span class="math inline">\(a \geq 0\)</span>.</p>
-</div>
-</div>
-<div id="why-zmctp" class="section level2">
-<h2>1.3 Why zmctp?</h2>
-<div id="problem-with-existing-implementations" class="section level3">
-<h3>Problem with Existing Implementations</h3>
-<p>The <code>cpd</code> package (available on CRAN) implements the CTP
-distribution but has a significant limitation: <strong>when fitting data
-with large sample sizes or zero-inflation, it often estimates <span class="math inline">\(b \approx 0\)</span></strong>, which reduces the
-model to a simpler form and loses flexibility.</p>
-</div>
-<div id="the-zmctp-solution" class="section level3">
-<h3>The zmctp Solution</h3>
-<p>This package addresses these limitations through:</p>
-<ol style="list-style-type: decimal">
-<li><strong>Robust optimization</strong> with reparameterization (<span class="math inline">\(\gamma = 2a + 2 + e^\eta\)</span>)</li>
-<li><strong>Zero-Modified CTP</strong> for excess/deficit zeros</li>
-<li><strong>Better handling</strong> of small <span class="math inline">\(b\)</span> values</li>
-<li><strong>Comprehensive diagnostics</strong> and visualization
-tools</li>
-</ol>
-</div>
-</div>
-</div>
-<div id="basic-usage" class="section level1">
-<h1>2. Basic Usage</h1>
+<p>The package implements the complex triparametric Pearson (CTP) parent
+and a zero-inflated mixture. The parent follows Rodríguez-Avi et
+al. (2003), <em>Statistical Papers</em> 44, 67–88, <a href="doi:10.1007/s00362-002-0134-7" class="uri">doi:10.1007/s00362-002-0134-7</a>. The zero-inflated
+extension is described in Chapter 3 of Oladoja’s 2021 Kwara State
+University thesis. The model’s original formulation and the numerical
+implementation are distinct contributions.</p>
 <div id="distribution-functions" class="section level2">
-<h2>2.1 Distribution Functions</h2>
-<p>The package provides standard distribution functions following R
-conventions:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Probability mass function</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">dctp</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; [1] 0.698789363 0.174697341 0.061871975 0.027253132 0.013839481 0.007765487</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Cumulative distribution function</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">pctp</span>(<span class="dv">3</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; [1] 0.9626118</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Quantile function (inverse CDF)</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">qctp</span>(<span class="fu">c</span>(<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>), <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; [1] 0 0 1</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Random generation</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rctp</span>(<span class="dv">30</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">5</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Sample mean:&quot;</span>, <span class="fu">mean</span>(x), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">Sample variance:&quot;</span>, <span class="fu">var</span>(x), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; Sample mean: 0.9333333 </span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; Sample variance: 3.443678</span></span></code></pre></div>
+<h2>Distribution functions</h2>
+<p>The parent has</p>
+<p><span class="math display">\[
+f(k)=f(0)\frac{(a+ib)_k(a-ib)_k}{(\gamma)_k k!},\qquad
+f(0)=\frac{\Gamma(\gamma-a-ib)\Gamma(\gamma-a+ib)}
+{\Gamma(\gamma)\Gamma(\gamma-2a)}.
+\]</span></p>
+<p>Arguments are scalar <code>a</code>, <code>b &gt;= 0</code> and
+<code>gama &gt; max(0, 2*a)</code>. The spelling <code>gama</code> is
+retained for compatibility. The normalising constant is computed
+independently of the counts requested. Negative or noninteger counts
+have probability zero. Missing vector entries propagate.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">dctp</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">6</span>,<span class="at">a=</span><span class="dv">1</span>,<span class="at">b=</span><span class="fl">0.5</span>,<span class="at">gama=</span><span class="dv">6</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; [1] 0.757021809 0.157712877 0.047877123 0.018452641 0.008329317 0.004206305</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; [7] 0.002310281</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">pctp</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>,<span class="dv">0</span>,<span class="dv">2</span>,<span class="cn">Inf</span>),<span class="dv">1</span>,<span class="fl">0.5</span>,<span class="dv">6</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; [1] 0.0000000 0.7570218 0.9626118 1.0000000</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">qctp</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">0.5</span>,<span class="fl">0.9</span>,<span class="dv">1</span>),<span class="dv">1</span>,<span class="fl">0.5</span>,<span class="dv">6</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; [1]   0   0   1 Inf</span></span></code></pre></div>
+<p>Mean and variance need <code>gama &gt; 2*a+1</code> and
+<code>gama &gt; 2*a+2</code> respectively; normalisability alone does
+not imply finite moments. Terminating parents at <code>b = 0</code> and
+nonpositive integer <code>a</code> are handled separately. A small
+positive <code>b</code> is not, by itself, evidence of an infinite
+variance.</p>
 </div>
-<div id="checking-for-overdispersion" class="section level2">
-<h2>2.2 Checking for Overdispersion</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Generate overdispersed data</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>x_over <span class="ot">&lt;-</span> <span class="fu">rctp</span>(<span class="dv">20</span>, <span class="at">a =</span> <span class="fl">1.2</span>, <span class="at">b =</span> <span class="fl">0.3</span>, <span class="at">gama =</span> <span class="dv">6</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">head</span>(x_over)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; [1] 0 0 1 1 1 0</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Calculate dispersion index</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>dispersion_index <span class="ot">&lt;-</span> <span class="fu">var</span>(x_over) <span class="sc">/</span> <span class="fu">mean</span>(x_over)</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Dispersion Index:&quot;</span>, dispersion_index, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; Dispersion Index: 0.6842105</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="cf">if</span> (dispersion_index <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Data is OVERDISPERSED</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (dispersion_index <span class="sc">&lt;</span> <span class="dv">1</span>) {</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Data is UNDERDISPERSED</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">&quot;Data is EQUIDISPERSED</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>}</span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; Data is UNDERDISPERSED</span></span></code></pre></div>
+<div id="zero-inflation" class="section level2">
+<h2>Zero inflation</h2>
+<p>The mixture is</p>
+<p><span class="math display">\[
+P(Y=0)=\omega+(1-\omega)f(0),\qquad
+P(Y=k)=(1-\omega)f(k),\quad k&gt;0.
+\]</span></p>
+<p>For the same nondegenerate parent, every positive <code>omega</code>
+increases the probability of zero. There is no change from deflation to
+inflation at 0.5. At <code>omega = 0</code> the distribution is CTP, and
+at <code>omega = 1</code> it is concentrated at zero. Negative mixing
+probabilities are not implemented.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">c</span>(<span class="at">parent=</span><span class="fu">dctp</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.5</span>,<span class="dv">6</span>),<span class="at">mixture=</span><span class="fu">dzictp</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.5</span>,<span class="dv">6</span>,<span class="fl">0.1</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt;    parent   mixture </span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; 0.7570218 0.7813196</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">mean_zictp</span>(<span class="dv">1</span>,<span class="fl">0.5</span>,<span class="dv">6</span>,<span class="fl">0.3</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; [1] 0.2916667</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">var_zictp</span>(<span class="dv">1</span>,<span class="fl">0.5</span>,<span class="dv">6</span>,<span class="fl">0.3</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; [1] 0.8263889</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">rzictp</span>(<span class="dv">12</span>,<span class="dv">1</span>,<span class="fl">0.5</span>,<span class="dv">6</span>,<span class="fl">0.3</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;  [1] 0 0 0 1 2 0 0 1 0 0 2 0</span></span></code></pre></div>
 </div>
-<div id="fitting-the-ctp-model" class="section level2">
-<h2>2.3 Fitting the CTP Model</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Fit CTP model to moderate-sized data</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>x_over <span class="ot">&lt;-</span> <span class="fu">rctp</span>(<span class="dv">200</span>, <span class="at">a =</span> <span class="fl">1.2</span>, <span class="at">b =</span> <span class="fl">0.3</span>, <span class="at">gama =</span> <span class="dv">6</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>fit_ctp <span class="ot">&lt;-</span> <span class="fu">ctp.fit</span>(x_over)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">print</span>(fit_ctp)</span></code></pre></div>
-<pre><code>CTP Distribution - Maximum Likelihood Estimates
-===============================================
-
-Parameter Estimates:
-     Estimate Std.Error
-a      1.4593    0.3585
-b      0.0011    0.0000
-gama   8.5912    3.1878
-
-Goodness-of-Fit Statistics:
-  Log-Likelihood: -178.1003
-  AIC: 362.2006
-  BIC: 372.0956
-  Pearson Chi-sq: 19.6799
-  Wald Chi-sq: 189.8432
-
-Convergence: YES</code></pre>
+<div id="likelihood-fitting" class="section level2">
+<h2>Likelihood fitting</h2>
+<p>Fitting is restricted to <code>b &gt; 0</code> and
+<code>gama &gt; max(0, 2*a+2)</code>. It retains transformed
+coordinates, uses multiple starting points and polishes the best
+solutions. The mixture probability is profiled analytically, including
+the exact <code>omega = 0</code> boundary. All-zero samples do not
+identify the parent parameters and produce an informative error.</p>
+<p>The following is a constructed frequency example; it is not one of
+the published application datasets.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">4</span>,<span class="fu">c</span>(<span class="dv">40</span>,<span class="dv">12</span>,<span class="dv">6</span>,<span class="dv">2</span>,<span class="dv">1</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">zictp.fit</span>(x)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>fit<span class="sc">$</span>estimates</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;             a             b          gama         omega </span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;  2.006727e+02 9.797449e-196  3.880699e+04  4.684350e-01</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>fit<span class="sc">$</span>logLik</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; [1] -61.53984</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>fit<span class="sc">$</span>diagnostics</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; $uncertainty</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Near boundary; Wald uncertainty withheld&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; $variance_margin</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; [1] 38403.65</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; $b_near_zero</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; $gama_near_zero</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; $omega_boundary</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; $parent_logLik</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; [1] -62.15639</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; $parent_converged</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; $fit_domain</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; [1] &quot;b &gt; 0; gama &gt; max(0, 2*a+2)&quot;</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; $goodness_of_fit</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Descriptive discrepancies; no calibrated p-values&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">plot</span>(fit,<span class="at">type=</span><span class="st">&quot;frequency&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>A successful optimiser code is one diagnostic. Inspect the variance
+margin, small <code>b</code>, small <code>gama</code>, and the
+uncertainty status. Local standard errors are omitted when boundary
+checks fail or the Hessian is not sufficiently positive definite. These
+checks do not establish finite-sample validity of a Wald
+approximation.</p>
+<p><code>fitted_freq</code> includes zero-frequency counts and a final
+upper-tail bin. Its last <code>x</code> value denotes the start of that
+bin. <code>pearson_chisq</code> and the historically named
+<code>wald_chisq</code> are descriptive discrepancies. The package does
+not attach calibrated goodness-of-fit p-values to them.</p>
 </div>
-<div id="diagnostic-plots" class="section level2">
-<h2>2.4 Diagnostic Plots</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">plot</span>(fit_ctp, <span class="at">type =</span> <span class="st">&quot;frequency&quot;</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">plot</span>(fit_ctp, <span class="at">type =</span> <span class="st">&quot;cdf&quot;</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">plot</span>(fit_ctp, <span class="at">type =</span> <span class="st">&quot;qq&quot;</span>)</span></code></pre></div>
-</div>
-</div>
-<div id="zero-modified-ctp-distribution" class="section level1">
-<h1>3. Zero-Modified CTP Distribution</h1>
-<div id="when-to-use-zm-ctp" class="section level2">
-<h2>3.1 When to Use ZM-CTP</h2>
-<p>Use the Zero-Modified CTP when:</p>
-<ul>
-<li>Data has <strong>excess zeros</strong> (zero-inflation)</li>
-<li>Data has <strong>deficit of zeros</strong> (zero-deflation)</li>
-<li>Standard CTP estimates <span class="math inline">\(b \approx
-0\)</span>
-<ul>
-<li>Over-dispersion is caused by zero-inflation</li>
-</ul></li>
-</ul>
-</div>
-<div id="mathematical-definition-1" class="section level2">
-<h2>3.2 Mathematical Definition</h2>
-<p>The ZM-CTP probability mass function is:</p>
-<p><span class="math display">\[P(X=0) = \omega + (1-\omega)
-P_{CTP}(0)\]</span> <span class="math display">\[P(X=k) = (1-\omega)
-P_{CTP}(k), \quad k &gt; 0\]</span></p>
-<p>where <span class="math inline">\(0 &lt; \omega &lt; 1\)</span> is
-the zero-modification parameter.</p>
-<p><strong>Interpretation:</strong> - <span class="math inline">\(\omega
-&gt; 0.5\)</span>: Zero-inflation - <span class="math inline">\(\omega
-&lt; 0.5\)</span>: Zero-deflation - <span class="math inline">\(\omega
-\approx 0\)</span>: Standard CTP is sufficient</p>
-</div>
-<div id="example-zero-inflated-data" class="section level2">
-<h2>3.3 Example: Zero-Inflated Data</h2>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Generate zero-inflated data</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>x_zi <span class="ot">&lt;-</span> <span class="fu">rzictp</span>(<span class="dv">300</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.5</span>, <span class="at">gama =</span> <span class="dv">6</span>, <span class="at">omega =</span> <span class="fl">0.3</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Proportion of zeros:&quot;</span>, <span class="fu">mean</span>(x_zi <span class="sc">==</span> <span class="dv">0</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Expected P(X=0) under CTP:&quot;</span>, <span class="fu">dctp</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.5</span>, <span class="dv">6</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>fit_ctp <span class="ot">&lt;-</span> <span class="fu">ctp.fit</span>(x_zi)</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>fit_zm <span class="ot">&lt;-</span> <span class="fu">zictp.fit</span>(x_zi)</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="fu">summary</span>(fit_zm)</span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Standard CTP AIC:&quot;</span>, fit_ctp<span class="sc">$</span>AIC, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;ZM-CTP AIC:&quot;</span>, fit_zm<span class="sc">$</span>AIC, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Omega estimate:&quot;</span>, fit_zm<span class="sc">$</span>estimates[<span class="st">&quot;omega&quot;</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
-<pre><code>Proportion of zeros: 0.7966667 
-Expected P(X=0) under CTP: 0.7570218 
-
-=== Zero-Modified CTP Distribution Fit Summary ===
-
-
-Zero-Modified CTP Distribution - Maximum Likelihood Estimates
-=============================================================
-
-Parameter Estimates:
-      Estimate Std.Error
-a       2.5646        NA
-b       0.0017        NA
-gama   16.8737        NA
-omega   0.4656        NA
-
-Goodness-of-Fit Statistics:
-  Log-Likelihood: -216.5545
-  AIC: 441.1090
-  BIC: 455.9241
-  Pearson Chi-sq: 2.7242
-  Wald Chi-sq: 287.6122
-
-Convergence: YES 
-
---- Moments ---
-  Mean: 0.3271 (empirical: 0.3267)
-  Variance: 0.6467 (empirical: 0.6220)
-  P(X=0): 0.7967 (empirical: 0.7967)
-
---- Observed vs Expected Frequencies ---
-  x Freq    expected
-1 0  239 239.0001656
-2 1   40  38.7105351
-3 2   11  13.7597381
-4 3    5   5.0633781
-5 4    4   1.9722958
-6 5    1   0.8143692
-
-Standard CTP AIC: 440.03 
-ZM-CTP AIC: 441.109 
-Omega estimate: 0.4656324</code></pre>
-</div>
-</div>
-<div id="comparison-with-cpd-package" class="section level1">
-<h1>5. Comparison with cpd Package</h1>
-<div id="the-problem-with-large-sample-sizes" class="section level2">
-<h2>5.1 The Problem with Large Sample Sizes</h2>
-<p>From Oladoja (2021):</p>
-<blockquote>
-<p>“Data sets previously utilized while fitting this model have sample
-sizes that are less than 2000. In this study, the CTP was fitted to
-different over-dispersed and under-dispersed count data sets with both
-small and large sample sizes.”</p>
-</blockquote>
-<blockquote>
-<p>“The ‘cpd’ package in R… estimated the parameter b as 0 for cases
-where the sample size n is large.”</p>
-</blockquote>
-</div>
-<div id="demonstration" class="section level2">
-<h2>5.2 Demonstration</h2>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Install cpd if needed</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># install.packages(&quot;cpd&quot;)</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">library</span>(zmctp)</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># Generate data where cpd struggles</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">100</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>x_problem <span class="ot">&lt;-</span> <span class="fu">rzictp</span>(<span class="dv">2000</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="fl">0.001</span>, <span class="at">gama =</span> <span class="dv">8</span>, <span class="at">omega =</span> <span class="fl">0.2</span>)</span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># Compare results</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>cpd_fit <span class="ot">&lt;-</span> cpd<span class="sc">::</span><span class="fu">fitctp</span>(x_problem, <span class="at">astart=</span><span class="dv">1</span>, <span class="at">bstart=</span><span class="fl">0.001</span>, <span class="at">gammastart=</span><span class="dv">8</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>zmctp_fit <span class="ot">&lt;-</span> <span class="fu">zictp.fit</span>(x_problem)</span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;cpd b estimate:&quot;</span>, cpd_fit<span class="sc">$</span>coefficients[<span class="dv">2</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;zmctp b estimate:&quot;</span>, zmctp_fit<span class="sc">$</span>estimates[<span class="st">&quot;b&quot;</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;zmctp omega estimate:&quot;</span>, zmctp_fit<span class="sc">$</span>estimates[<span class="st">&quot;omega&quot;</span>], <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
-<pre><code>
-cpd b estimate: 8.072796e-07 
-zmctp b estimate: 0.0007942037 
-zmctp omega estimate: 0.04831814</code></pre>
-</div>
-</div>
-<div id="model-selection-guide" class="section level1">
-<h1>6. Model Selection Guide</h1>
-<div id="decision-tree" class="section level2">
-<h2>6.1 Decision Tree</h2>
-<pre><code>Is your data count data?
-  ├─ NO → Use appropriate model for your data type
-└─ YES → Calculate Dispersion Index (DI = variance/mean)
-├─ DI ≈ 1 → Poisson
-├─ DI &gt; 1 (Over-dispersed)
-│   ├─ Excess zeros? → Try ZIP, ZINB, ZM-CTP
-│   ├─ Excess non-zeros? → Try CTP, NB
-│   └─ Large n &amp; b→0 in cpd? → Use zmctp!
-  └─ DI &lt; 1 (Under-dispersed) → Try CTP</code></pre>
-</div>
-</div>
-<div id="properties-and-theoretical-results" class="section level1">
-<h1>7. Properties and Theoretical Results</h1>
-<div id="skewness" class="section level2">
-<h2>7.1 Skewness</h2>
-<p>The CTP distribution has <strong>positive skewness</strong>:</p>
-<p><span class="math display">\[\mu_3 = \frac{(a^2 + b^2)[4b^2 + (\gamma
-- 1)^2] + [b^2 + (\gamma - 1 - a)^2]}{(\gamma - 2a - 1)^3(\gamma - 2a -
-2)(\gamma - 2a - 3)}\]</span></p>
-<p>Since both numerator and denominator are always positive, the
-distribution is right-skewed.</p>
-</div>
-<div id="mode" class="section level2">
-<h2>7.2 Mode</h2>
-<p>The distribution is uni-modal at:</p>
-<p><span class="math display">\[y = \left\lfloor \frac{(a-1)^2 +
-b^2}{\gamma - 2a + 1} \right\rfloor\]</span></p>
-<p>## 7.3 Convergence</p>
-<p>The CTP distribution converges to: - <strong>Poisson</strong> when
-<span class="math inline">\(\gamma\)</span> and <span class="math inline">\(a^2 + b^2 \rightarrow \infty\)</span> at the same
-rate - <strong>Normal</strong> when <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\sqrt{a^2 + b^2}\)</span> have the same order of
-convergence # 9. Conclusion</p>
-<p>The <strong>zmctp</strong> package provides a robust implementation
-of the CTP distribution that:</p>
-<p>✅ Handles both over-dispersion and under-dispersion<br />
-✅ Works with large sample sizes (n &gt; 2000)<br />
-✅ Addresses the b → 0 problem in existing implementations<br />
-✅ Provides zero-modified variants for zero-inflated data<br />
-✅ Includes comprehensive diagnostics and visualization</p>
-</div>
-<div id="key-findings-from-oladoja-2021" class="section level2">
-<h2>9.1 Key Findings from Oladoja (2021)</h2>
-<blockquote>
-<p>“The CTP produced similar fit to the NB model while correcting for
-over-dispersion caused by excess zeros but is a better fit than the NB
-when over-dispersion is caused by excessive non-zero values in a data
-set.”</p>
-</blockquote>
-<blockquote>
-<p>“The CTP model behaved better with under-dispersed data sets than the
-Poisson model.”</p>
-</blockquote>
-<blockquote>
-<p>“The package ‘cpd’ in R estimates b as 0 for zero-inflated data sets
-while the program utilized in this study works well.”</p>
-</blockquote>
-</div>
-</div>
-<div id="references" class="section level1">
-<h1>References</h1>
-<p>Böhning, D., Dietz, E., &amp; Schlattmann, P. (1999). The
-zero-inflated Poisson model and the decayed, missing and filled teeth
-index in dental epidemiology. <em>Journal of the Royal Statistical
-Society: Series A</em>, 162(2), 195-209.</p>
-<p>Deb, P., &amp; Trivedi, P. K. (1997). Demand for medical care by the
-elderly: a finite mixture approach. <em>Journal of Applied
-Econometrics</em>, 12(3), 313-336.</p>
-<p>Oladoja, R. O. (2021). Complex Tri-Parametric Pearson Distribution
-and Its Applications. <em>M.Sc. Thesis</em>, Kwara State University,
-Malete, Nigeria.</p>
-<p>Rodríguez-Avi, J., Conde-Sánchez, A., &amp; Sáez-Castillo, A. J.
-(2003). A new class of discrete distributions with complex parameters.
-<em>Statistical Papers</em>, 44(1), 67-88. <a href="https://doi.org/10.1007/s00362-002-0134-7" class="uri">https://doi.org/10.1007/s00362-002-0134-7</a></p>
-</div>
-<div id="session-info" class="section level1">
-<h1>Session Info</h1>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; R version 4.5.1 (2025-06-13 ucrt)</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; Running under: Windows 11 x64 (build 26200)</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt;   LAPACK version 3.12.1</span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=C                          </span></span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=English_United States.utf8   </span></span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=English_United States.utf8</span></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                          </span></span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=English_United States.utf8    </span></span>
-<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; time zone: America/Chicago</span></span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
-<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
-<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
-<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
-<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; [1] zmctp_0.1.3</span></span>
-<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt;  [1] digest_0.6.39   R6_2.6.1        fastmap_1.2.0   xfun_0.53      </span></span>
-<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt;  [5] cachem_1.1.0    knitr_1.51      htmltools_0.5.9 rmarkdown_2.30 </span></span>
-<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt;  [9] lifecycle_1.0.4 cli_3.6.5       sass_0.4.10     jquerylib_0.1.4</span></span>
-<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; [13] compiler_4.5.1  tools_4.5.1     evaluate_1.0.5  bslib_0.9.0    </span></span>
-<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co">#&gt; [17] yaml_2.3.12     otel_0.2.0      rlang_1.1.6     jsonlite_2.0.0</span></span></code></pre></div>
+<div id="quantiles-and-runtime" class="section level2">
+<h2>Quantiles and runtime</h2>
+<p><code>max_q</code> is an initial endpoint. A quantile search expands
+it until all requested probabilities are bracketed, subject to
+<code>max_count</code> (default 1,000,000). A failed search raises an
+error; it does not return a capped count. Infinite-support quantiles at
+probability one are infinite.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># This parent has F(k) = 1 - 1/(k+2).</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">qctp</span>(<span class="fl">0.9997</span>,<span class="at">a=</span><span class="dv">1</span>,<span class="at">b=</span><span class="dv">0</span>,<span class="at">gama=</span><span class="dv">3</span>,<span class="at">max_q=</span><span class="dv">1000</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] 3332</span></span></code></pre></div>
+<p>The default fitting argument <code>method</code> remains available
+and supplements the multistart search. <code>omega_start</code> is
+accepted for compatibility but does not affect the analytic profile.
+<code>raw_optim$par</code> now stores <code>a</code>,
+<code>log_b</code>, and <code>log_margin</code>; use
+<code>estimates</code> for natural parameters.</p>
+<p>The research supplement contains the bootstrap studies, checkpoints
+and inference code. Bootstrap inference is not a public function in
+0.1.4. The earlier study and the new package have separate code
+histories; the package checks do not constitute a new simulation
+calibration study.</p>
 </div>
 
 

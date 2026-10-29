@@ -20,18 +20,19 @@ print.ctpfit <- function(x, ...) {
   )
   print(est_table)
 
-  cat("\nGoodness-of-Fit Statistics:\n")
+  cat("\nFit statistics and descriptive discrepancies:\n")
   cat(sprintf("  Log-Likelihood: %.4f\n", x$logLik))
   cat(sprintf("  AIC: %.4f\n", x$AIC))
   cat(sprintf("  BIC: %.4f\n", x$BIC))
-  cat(sprintf("  Pearson Chi-sq: %.4f\n", x$pearson_chisq))
-  cat(sprintf("  Wald Chi-sq: %.4f\n", x$wald_chisq))
+  cat(sprintf("  Pearson discrepancy: %.4f\n", x$pearson_chisq))
+  cat(sprintf("  Standardised residual sum: %.4f\n", x$wald_chisq))
 
   cat("\nConvergence:", ifelse(x$converged, "YES", "NO"), "\n")
   if (isTRUE(x$near_boundary)) {
     cat("WARNING: estimated gama is very close to the variance-existence\n",
         "         boundary (gama = 2a + 2); this fit may be unreliable.\n", sep = "")
   }
+  if (!is.null(x$diagnostics$uncertainty)) cat("Uncertainty:", x$diagnostics$uncertainty, "\n")
   invisible(x)
 }
 #' Print method for zictpfit objects
@@ -52,18 +53,19 @@ print.zictpfit <- function(x, ...) {
   )
   print(est_table)
 
-  cat("\nGoodness-of-Fit Statistics:\n")
+  cat("\nFit statistics and descriptive discrepancies:\n")
   cat(sprintf("  Log-Likelihood: %.4f\n", x$logLik))
   cat(sprintf("  AIC: %.4f\n", x$AIC))
   cat(sprintf("  BIC: %.4f\n", x$BIC))
-  cat(sprintf("  Pearson Chi-sq: %.4f\n", x$pearson_chisq))
-  cat(sprintf("  Wald Chi-sq: %.4f\n", x$wald_chisq))
+  cat(sprintf("  Pearson discrepancy: %.4f\n", x$pearson_chisq))
+  cat(sprintf("  Standardised residual sum: %.4f\n", x$wald_chisq))
 
   cat("\nConvergence:", ifelse(x$converged, "YES", "NO"), "\n")
   if (isTRUE(x$near_boundary)) {
     cat("WARNING: estimated gama is very close to the variance-existence\n",
         "         boundary (gama = 2a + 2); this fit may be unreliable.\n", sep = "")
   }
+  if (!is.null(x$diagnostics$uncertainty)) cat("Uncertainty:", x$diagnostics$uncertainty, "\n")
   invisible(x)
 }
 #' Summary method for ctpfit objects

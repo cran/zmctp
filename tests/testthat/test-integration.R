@@ -1,0 +1,35 @@
+test_that("fits retain the API, exact parent boundary and honest uncertainty", {
+  x <- rep(1:3,c(60,30,10)) # No zeros forces omega=0 for every feasible parent.
+  fit <- suppressWarnings(zictp.fit(x))
+  parent <- suppressWarnings(ctp.fit(x))
+  expect_s3_class(fit,"zictpfit")
+  expect_s3_class(parent,"ctpfit")
+  expect_identical(unname(fit$estimates["omega"]),0)
+  expect_true(fit$logLik >= parent$logLik-1e-6)
+  expect_equal(fit$logLik,sum(dzictp(x,fit$estimates[1],fit$estimates[2],
+                                   fit$estimates[3],fit$estimates[4],log=TRUE)),tolerance=1e-8)
+  expect_null(fit$se)
+  expect_match(fit$diagnostics$uncertainty,"boundary")
+  fields <- c("estimates","se","vcov","logLik","AIC","BIC","pearson_chisq",
+              "wald_chisq","fitted_freq","data","converged","near_boundary","method","raw_optim")
+  expect_true(all(fields %in% names(fit)))
+  expect_identical(names(fit$estimates),c("a","b","gama","omega"))
+  expect_equal(sum(fit$fitted_freq$expected),length(x),tolerance=1e-10)
+  expect_true(fit$fitted_freq$Freq[fit$fitted_freq$x==0] == 0)
+  expect_true(tail(fit$fitted_freq$tail,1))
+  expect_output(expect_identical(print(fit),fit),"Convergence")
+  expect_output(expect_identical(summary(fit),fit),"Moments")
+  file <- tempfile(fileext=".pdf")
+  grDevices::pdf(file)
+  for (type in c("frequency","cdf","qq")) plot(fit,type=type)
+  grDevices::dev.off(); unlink(file)
+})
+
+test_that("non-estimable samples and invalid arguments fail clearly", {
+  expect_error(ctp.fit(rep(0,5)),"All-zero")
+  expect_error(zictp.fit(rep(0,5)),"All-zero")
+  expect_error(ctp.fit(c(0,1.5)),"integer")
+  expect_error(zictp.fit(c(0,NA)),"finite")
+  expect_error(ctp.fit(c(0,1),b_start=-1),"positive")
+  expect_error(zictp.fit(c(0,1),omega_start=1),"below one")
+})

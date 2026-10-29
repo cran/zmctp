@@ -43,6 +43,7 @@ plot.zictpfit <- function(x, type = c("frequency", "cdf", "qq"), ...) {
       Expected = freq_df$expected
     )
     colnames(counts_mat) <- as.character(freq_df$x)
+    if ("tail" %in% names(freq_df)) colnames(counts_mat)[freq_df$tail] <- paste0(">=", freq_df$x[freq_df$tail])
     
     graphics::barplot(
       counts_mat,

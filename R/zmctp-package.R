@@ -1,4 +1,5 @@
-#' @importFrom stats plogis qlogis optim runif var sd
+#' @importFrom stats plogis qlogis optim runif var sd setNames
+#' @importFrom utils head tail
 #' @importFrom graphics abline barplot legend lines par plot
 NULL
 
@@ -6,8 +7,8 @@ NULL
 #'
 #' @description
 #' The zmctp package extends the Complex Triparametric Pearson (CTP)
-#' distribution with zero-modified versions for handling overdispersed
-#' count data, particularly when the parameter b approaches zero.
+#' distribution with a zero-inflated mixture. It provides distribution
+#' functions, likelihood fitting and numerical boundary diagnostics.
 #'
 #' @details
 #' Main functions:

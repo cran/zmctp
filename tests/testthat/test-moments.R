@@ -49,7 +49,7 @@ test_that("mode_ctp gives the correct mode, verified against direct pmf computat
 })
 
 test_that("mode_ctp correctly identifies the exact tie (bimodal) case", {
-  a <- 2; b <- 1; y0_target <- 3
+  a <- -1; b <- 3; y0_target <- 3
   gama <- (a^2 + b^2 + y0_target*(2*a - 1)) / (y0_target + 1)
   
   result <- mode_ctp(a, b, gama)

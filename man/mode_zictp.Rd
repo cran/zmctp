@@ -2,22 +2,21 @@
 % Please edit documentation in R/moments.R
 \name{mode_zictp}
 \alias{mode_zictp}
-\title{Mode of the ZI-CTP distribution}
+\title{Mode of the zero-inflated CTP distribution}
 \usage{
 mode_zictp(a, b, gama, omega)
 }
 \arguments{
-\item{a}{alpha parameter}
+\item{a, b, gama}{Scalar parent parameters; see \code{dctp}.}
 
-\item{b}{b parameter (b >= 0)}
-
-\item{gama}{gamma parameter}
-
-\item{omega}{zero-inflation parameter}
+\item{omega}{Scalar mixing probability in \code{[0, 1]}.}
 }
 \value{
-the mode (a single integer)
+The smallest modal integer; ties are resolved to the smallest value.
 }
 \description{
-Mode of the ZI-CTP distribution
+Mode of the zero-inflated CTP distribution
+}
+\examples{
+mode_zictp(-1.5, 1.8, 3.8, 0.3)
 }

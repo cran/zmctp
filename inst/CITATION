@@ -1,0 +1,8 @@
+bibentry(bibtype = "Manual",
+  title = "zmctp: Complex Triparametric Pearson and Zero-Inflated Count Models",
+  author = c(person("Rasheedat", "Oladoja"),
+             person("Kabir Opeyemi", "Olorede")),
+  year = "2026",
+  note = "R package version 0.1.4",
+  url = "https://CRAN.R-project.org/package=zmctp",
+  doi = "10.32614/CRAN.package.zmctp")

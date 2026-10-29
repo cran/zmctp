@@ -4,7 +4,7 @@
 \alias{mean_ctp}
 \alias{var_ctp}
 \alias{skew_ctp}
-\title{Theoretical moments of the CTP distribution}
+\title{Moments of the CTP distribution}
 \usage{
 mean_ctp(a, b, gama)
 
@@ -13,23 +13,23 @@ var_ctp(a, b, gama)
 skew_ctp(a, b, gama)
 }
 \arguments{
-\item{a, b, gama}{CTP parameters.}
+\item{a, b, gama}{Scalar parent parameters; see \code{dctp}.}
+}
+\value{
+A scalar mean, variance or skewness.
 }
 \description{
-Theoretical moments of the CTP distribution
+Moments of the CTP distribution
 }
 \details{
-These functions do not validate that the parameter constraints required
-for a given moment to exist are satisfied (e.g. \code{gama > 2*a+2} for
-the variance, \code{gama > 2*a+3} for the skewness). Outside these
-regions the returned value may be \code{Inf}, \code{NaN}, or negative;
-see \code{\link{dctp}} for the corresponding existence warnings applied
-at the density level. See \code{\link{mode_ctp}} for the mode, including
-its tie-case handling.
+For an infinite-support parent the mean, variance and third
+  moment require \code{gama > 2*a+1}, \code{gama > 2*a+2}, and
+  \code{gama > 2*a+3}, respectively. A nonexisting mean or variance
+  returns \code{Inf} with a warning; nonexisting skewness returns
+  \code{NaN} with a warning. Terminating parents are handled separately.
 }
 \examples{
-mean_ctp(a = 1, b = 0.5, gama = 6)
-var_ctp(a = 1, b = 0.5, gama = 6)
-skew_ctp(a = 1, b = 0.5, gama = 6)
-
+mean_ctp(1, 0.5, 6)
+var_ctp(1, 0.5, 6)
+skew_ctp(1, 0.5, 6)
 }

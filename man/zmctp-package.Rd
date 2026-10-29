@@ -7,8 +7,8 @@
 \title{zmctp: Zero-Modified Complex Triparametric Pearson Distribution}
 \description{
 The zmctp package extends the Complex Triparametric Pearson (CTP)
-distribution with zero-modified versions for handling overdispersed
-count data, particularly when the parameter b approaches zero.
+distribution with a zero-inflated mixture. It provides distribution
+functions, likelihood fitting and numerical boundary diagnostics.
 }
 \details{
 Main functions:
@@ -31,5 +31,10 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Rasheedat Oladoja \email{roladoja@ttu.edu} (\href{https://orcid.org/0009-0001-5883-8039}{ORCID})
+
+Authors:
+\itemize{
+  \item Kabir Opeyemi Olorede (\href{https://orcid.org/0000-0001-5065-6516}{ORCID})
+}
 
 }

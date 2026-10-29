@@ -1,3 +1,34 @@
+# zmctp 0.1.4
+
+* Declare the stats::setNames and utils::head/tail namespace imports, and
+  clarify the DESCRIPTION wording following CRAN's incoming pre-tests.
+* Replace requested-support normalisation with a shifted log-gamma normalising
+  constant and log recurrence. Density/CDF calls no longer depend on the largest
+  count passed in the same call.
+* Expand quantile searches beyond `max_q` (now an initial endpoint). Add optional
+  `max_count`; exceeding the work limit signals an error instead of capping a
+  count. Quantiles at probability one use the distribution support endpoint.
+* Support omega zero and one in distribution functions. Correct the explanation
+  of zero inflation; positive omega increases zero probability for the same
+  nondegenerate parent.
+* Fit with multiple starts, retain transformed coordinates, and profile omega
+  analytically including the exact parent boundary. Preserve method defaults;
+  requested methods supplement Nelder-Mead and nlminb. Retain omega_start as a
+  validated compatibility argument; profiling makes its value unnecessary.
+* Preserve fitted classes, existing fields and S3 methods. Add theta, attempts
+  and diagnostics. raw_optim$par now uses a/log_b/log_margin coordinates.
+* Reject all-zero fits as unidentified. Validate probability and moment domains.
+  Return zero probabilities for invalid support points and propagate missing
+  vector entries. Random-generation n must be an integer, rather than truncated.
+* Withhold Wald uncertainty near boundaries or for an unsuitable Hessian; remove
+  Hessian jitter and negative covariance clipping.
+* Include unobserved cells and an upper-tail bin in fitted_freq. Clarify that
+  Pearson and historically named Wald discrepancies are descriptive.
+* Add numerical regression tests and replace static vignette results with
+  executable constructed examples. Add Kabir Opeyemi Olorede as a package author;
+  Rasheedat Oladoja remains the registered maintainer.
+* Keep bootstrap inference in the research supplement for this release.
+
 # zmctp 0.1.3
 
 ## Bug fixes

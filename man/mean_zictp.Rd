@@ -4,7 +4,7 @@
 \alias{mean_zictp}
 \alias{var_zictp}
 \alias{skew_zictp}
-\title{Theoretical moments and mode of the ZI-CTP distribution}
+\title{Moments of the zero-inflated CTP distribution}
 \usage{
 mean_zictp(a, b, gama, omega)
 
@@ -13,33 +13,23 @@ var_zictp(a, b, gama, omega)
 skew_zictp(a, b, gama, omega)
 }
 \arguments{
-\item{a, b, gama}{CTP parameters.}
+\item{a, b, gama}{Scalar parent parameters; see \code{dctp}.}
 
-\item{omega}{Zero-inflation parameter.}
+\item{omega}{Scalar mixing probability in \code{[0, 1]}.}
+}
+\value{
+A scalar mean, variance or skewness.
 }
 \description{
-Theoretical moments and mode of the ZI-CTP distribution
+Moments of the zero-inflated CTP distribution
 }
 \details{
-These functions do not validate that the parameter constraints required
-for a given moment to exist are satisfied (e.g. \code{gama > 2*a+2} for
-the variance, \code{gama > 2*a+3} for the skewness), the same caveat
-documented in \code{\link{mean_ctp}}.
+Moment domains are the same as for the parent, except that
+  \code{omega = 1} gives mean and variance zero. Skewness of a degenerate
+  distribution is undefined and returns \code{NaN}.
 }
 \examples{
-# Quick illustration (fast, runs during R CMD check)
-mean_zictp(a = 1, b = 0.5, gama = 6, omega = 0.3)
-var_zictp(a = 1, b = 0.5, gama = 6, omega = 0.3)
-skew_ctp(a = 1, b = 0.5, gama = 6)
-skew_zictp(a = 1, b = 0.5, gama = 6, omega = 0.3)
-mode_zictp(a = 1, b = 0.5, gama = 6, omega = 0.3)
-
-\donttest{
-# Empirical check against simulated data (slower, skipped on CRAN checks)
-set.seed(2026)
-x <- rzictp(50000, a = 1, b = 0.5, gama = 6, omega = 0.3)
-skew_zictp(1, 0.5, 6, 0.3)                       # theoretical
-mean((x - mean(x))^3) / sd(x)^3                  # empirical
-}
-
+mean_zictp(1, 0.5, 6, 0.3)
+var_zictp(1, 0.5, 6, 0.3)
+skew_zictp(1, 0.5, 6, 0.3)
 }
